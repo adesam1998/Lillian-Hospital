@@ -1,26 +1,26 @@
 import pandas as pd
 import boto3
 import s3fs
+import sys
+#from awsglue.transform import *
+#from awsglue.utils import getResolvedOptions
+#from pyspark.context import SparkContext
+#from awsglue.context import GlueContext
+#from awsglue.job import Job 
+#import pyspark.sql.functions as f
+#from awsglue.dynamicframe import dynamicFrame 
 import os
 import logging
 import configparser
 import csv
 
-                            ##  CONVERT AND READ CSV FILES TO DATAFRAME
-
-df_clinical_trial = pd.read_csv('clinical_trials_data.csv')
-df_imaging_results = pd.read_csv('imaging_results_data.csv')
-df_lab_results = pd.read_csv('lab_results_data.csv')
-df_medical_records = pd.read_csv('medical_records_data.csv')
-df_patients_data = pd.read_csv('patients_data.csv')
-df_trial_participants =pd.read_csv('trial_participants_data.csv')
 
 # Reading the configuration .env file
 config = configparser.ConfigParser()        # To manage the API keys that want to be keep out of public
 config.read('.env')         # To read the private API keys 
 
-access_key=config['AWS']['access_key']                   # Acessing the access_key 
-secret_key=config['AWS']['secret_key']                   # Accessing the secret_key 
+access_key=config['AWS']['access_key']             # Acessing the access_key 
+secret_key=config['AWS']['secret_key']             # Accessing the secret_key 
 bucket_name=config['AWS']['bucket_name']                 # Accessing the S3 bucket name
 region=config['AWS']['region']                           # Accessing the nearest region to the data
 
@@ -38,8 +38,7 @@ def create_bucket():
         },
     )
 create_bucket()
-print(f'{bucket_name} is now available and active on your AWS account')
-
+print(f'{bucket_name} is now available on your AWS account')
 
                                 ##  UPLOAD RAW DATA FROM LOCAL STORAGE TO AWS S3 BUCKET
 
