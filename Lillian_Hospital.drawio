@@ -1,4 +1,4 @@
-<mxfile host="Electron" modified="2024-02-21T14:55:05.611Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/23.1.5 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="L7hJuKQAPl30Zxi2tI3M" version="23.1.5" type="device" pages="3">
+<mxfile host="Electron" modified="2024-02-22T17:11:56.026Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/23.1.5 Chrome/120.0.6099.109 Electron/28.1.0 Safari/537.36" etag="UDFOcScl3gWrzc5J1CFr" version="23.1.5" type="device" pages="3">
   <diagram name="Original_Schema" id="WMOSrjQimsKPjA6NSmLH">
     <mxGraphModel dx="794" dy="511" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
       <root>
@@ -528,7 +528,7 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="lho3Q-sDmwuvZv33ExAk-5" value="" style="rounded=0;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="10" y="-10" width="800" height="610" as="geometry" />
+          <mxGeometry x="10" y="-8" width="800" height="610" as="geometry" />
         </mxCell>
         <mxCell id="X7Ry0uLC-6nlI1Gcp4MT-1" value="fact_table" style="shape=table;startSize=30;container=1;collapsible=1;childLayout=tableLayout;fixedRows=1;rowLines=0;fontStyle=1;align=center;resizeLast=1;html=1;" parent="1" vertex="1">
           <mxGeometry x="320" width="180" height="360" as="geometry" />
