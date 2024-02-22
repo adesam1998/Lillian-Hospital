@@ -165,4 +165,81 @@ medical_records_df = mapped_medical_records.toDF()
 patients_data_df = mapped_patients_data.toDF()
 trial_participants_df = mapped_trial_participants.toDF()
 
-# Transformation
+# Transformation Layer
+patient_dim = patients_data_df[['patient_id', 'first_name', 'last_name', 'date_of_birth', 'gender', 'ethnicity', 'address', 'contact_number']]  # Not dropping duplicate because we assume that there is no patient with two or more patient_id
+test_dim = lab_results_df[['test_name, test_date', 'test_result']].drop_duplicates().reset_index(drop=True).reset_index().rename(columns={'index':'test_id'})
+treatment_dim = medical_records_df[['treatment_description, prescribed_medications', 'diagnosis']].drop_duplicates().reset_index(drop=True).reset_index().rename(columns={'index':'treatment_id'})
+imaging_dim = imaging_results_df[['imaging_type, imaging_date', 'image_url']].drop_duplicates().reset_index(drop=True).reset_index().rename(columns={'index':'imaging_id'}) 
+trial_dim = clinical_trials_df[['trial_name, principal_investigator', 'trial_description']].drop_duplicates().reset_index(drop=True).reset_index().rename(columns={'index':'trial_name'}) 
+participant_dim = trial_participants_df[['enrollment_date, participant_status']].drop_duplicates().reset_index(drop=True).reset_index().rename(columns={'index':'participant_id'}) 
+
+fact_table = medical_records_df.merge(patients_data_df, on='patient_id', how='inner') \
+                             .merge(imaging_results_df, on='patient_id', how='inner') \
+                             .merge(lab_results_df, on='patient_id', how='inner') \
+                             .merge(trial_participants_df, on='patient_id', how='inner')
+                            
+fact_table = fact_table.merge(clinical_trials_df, on='trial_id', how='inner')
+
+# Slice out the table we need from the fact table
+fact_table = fact_table[['record_id', 'patient_id', 'imaging_type', 'trial_name', 'test_name', 'treatment_description', 'start_date', 'end_date', 'enrollment_date', 'admission_date', 'discharge_date']]
+
+# Convert all the DataFrame fact and dimensional table back to DynamicFrame for the AWS Glue sik
+patient_dim_dyf = dynamicFrame.fromDF(patient_dim, glueContext, 'patient_dim_dyf')
+test_dim_dyf = dynamicFrame.fromDF(test_dim, glueContext, 'test_dim_dyf')
+treatment_dim_dyf = dynamicFrame.fromDF(treatment_dim, glueContext, 'treatment_dim_dyf')
+imaging_dim_dyf = dynamicFrame.fromDF(imaging_dim, glueContext, 'imaging_dim_dyf')
+trial_dim_dyf = dynamicFrame.fromDF(trial_dim, glueContext, 'trial_dim_dyf')
+participant_dim_dyf = dynamicFrame.fromDF(participant_dim, glueContext, 'participant_dim_dyf')
+fact_table_dyf = dynamicFrame.fromDF(fact_table, glueContext, 'fact_table_dyf')
+
+# Loading Layer
+
+# Save as CSV
+csv_sink = glueContext.getSink(
+    path=output_dir + 'csv/',
+    connection_type='s3',
+    updateBehavior='UPDATE_IN_DATABASE',
+    partitionKeys=[],
+    compression='gzip',
+    enableUpdateCatalog=True,
+    transformation_ctx='csv_sink',
+)
+csv_sink.setCatalogInfo(
+    catalogDatabase='lilian_hospital_database', catalogTableName='patient_dim'
+)
+csv_sink.setFormat('csv')
+csv_sink.writeFrame(patient_dim_dyf)
+
+# Save as Parque file
+parquet_sink = glueContext.getSink(
+    path=output_dir + 'parquet/',
+    connection_type='s3',
+    updateBehavior='UPDATE_IN_DATABASE',
+    partitionKeys=[],
+    compression='gzip',
+    enableUpdateCatalog=True,
+    transformation_ctx='parque_sink',
+)
+parquet_sink.setCatalogInfo(
+    catalogDatabase='lilian_hospital_database', catalogTableName='patient_dim_parquet'
+)
+parquet_sink.setFormat('glueParquet')
+parquet_sink.writeFrame(patient_dim_dyf)
+
+# Save as json withou compression
+json_sink = glueContext.getSink(
+    path=output_dir + 'json/',
+    connection_type='s3',
+    updateBehavior='UPDATE_IN_DATABASE',
+    partitionKeys=[],
+    enableUpdateCatalog=True,
+    transformation_ctx='json_sink',
+)
+json_sink.setCatalogInfo(
+    catalogDatabase='lilian_hospital_database', catalogTableName='patient_dim_json'
+)
+json_sink.setFormat('json')
+json_sink.writeFrame(patient_dim_dyf)
+
+# Commiting the job to finalize everything
+job.commit()
